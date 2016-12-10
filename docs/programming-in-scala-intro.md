@@ -126,3 +126,5 @@ for (arg <- args)
 ```
 
 이러한 표현에서, arg는 val 변수의 이름으로써 변경불가능한 변수임을 유의해야 한다.
+
+[Next](programming-in-scala-secondsteps.md)
