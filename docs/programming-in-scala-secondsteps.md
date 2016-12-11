@@ -84,7 +84,7 @@ println(simpleList1 + " and " + simpleList2 + " are not mutated.")
 println("Therefore, " + resultList + " is a new list.")
 ```
 
-다음의 코드는 새 원소를 기존 리스트의 앞에 추가하여 반환하는 ::메소드의 예시이다. `::`메소드는 **콘즈(cons)**라고 부르며, 리스트에서 가장 자주 사용하는 연산자들 중의 하나이다.
+다음의 코드는 새 원소를 기존 리스트의 앞에 추가하여 반환하는 :: 메소드의 예시이다. :: 메소드는 **콘즈(cons)**라고 부르며, 리스트에서 가장 자주 사용하는 연산자들 중의 하나이다.
 
 ```Scala
 val simpleList = List(1,2,3)
@@ -93,7 +93,7 @@ val resultList = 0 :: simpleList
 println(resultList)     //List(0, 1, 2, 3)
 ```
 
-*Note) `0 :: simpleList`에서 ::는 오른쪽에 있는 피연산자 List인 simpleList의 메소드이다. 이는 행렬에서 살펴보았던 \*나 to같은 메소드와 달리, :로 끝나는 메소드의 경우 연산자 표기법으로 사용할 시 오른쪽의 피연산자에 대해 호출을 한다는 규칙에 의해서이다.*
+_Note) `0 :: simpleList`에서 ::는 오른쪽에 있는 피연산자 List인 simpleList의 메소드이다. 이는 행렬에서 살펴보았던 \* 나 to같은 메소드와 달리, :로 끝나는 메소드의 경우 연산자 표기법으로 사용할 시 오른쪽의 피연산자에 대해 호출을 한다는 규칙에 의해서이다._
 
 빈 리스트(Nil)와 콘즈 연산자를 사용하여 다음과 같은 방법으로도 새로운 리스트를 초기화할 수 있다.
 
@@ -120,10 +120,10 @@ println(pair._2)    //Luftballons
 
 *NOTE) 트레이트는 자바의 인터페이스와 비슷한 개념이다. 자바는 인터페이스를 구현(implement)하지만, 스칼라에서는 트레이트를 확장(extend)하거나 혼합(mix in)하는 차이점이 있다.*
 
-예를 들어 스칼라의 집합은 `scala.collection`패키지 내부에서 다음과 같은 계층 구조를 가지고 있다.
+예를 들어 스칼라의 **집합(Set)**은 `scala.collection`패키지 내부에서 다음과 같은 계층 구조를 가지고 있다.
 
     .immutable.Set 트레이트와 .mutable.Set 트레이트는 .Set 트레이트를 확장한다.
-    .immutable.HashSet 클래스와 .mutable.HashSet는 각각 .immutable.Set와 .mutable.Set 트레이트를 확장한다.
+    .immutable.HashSet 클래스와 .mutable.HashSet 클래스는 각각 .immutable.Set와 .mutable.Set 트레이트를 확장한다.
 
 변경 불가능한 집합의 인스턴스화 및 사용은 다음과 같다.
 
@@ -185,7 +185,64 @@ println(instructionMap(2))
 
 ```Scala
 val immutableMap = Map(
-  1 -> "I", 2 -> "II", 3 -> "III", 4 -> "IV"
+    1 -> "I", 2 -> "II", 3 -> "III", 4 -> "IV"
 )
 println(immutableMap(1))
 ```
+
+### 함수형 프로그래밍
+
+스칼라를 사용하여 명령형 프로그래밍 보다는 함수형 스타일을 더욱 활용할 것을 권장한다. 어떤 프로그램이 함수형 스타일인지 코드상에서 쉽게 확인할 수 있는 방법은 다음과 같다.
+
+-   코드에 변경 가능한 변수(var)가 존재하는지 확인한다.
+
+    코드에 var 변수가 있다면 그 코드는 명령형 스타일이다. 오직 val 변수만 존재한다면, 그 코드는 함수형 스타일일 가능성이 높다. 다음 코드를 보자.
+
+    ```Scala
+    def printArgs(args: Array[String]) : Unit = {
+        var i = 0
+        while (i < args.length) {
+            println(args(i))
+            i += 1
+        }
+    }
+    ```
+
+    이 코드는 var 변수가 있으므로 명령형이다. var을 없앰으로서 해당 코드를 더 함수적으로 만들 수 있다.
+
+    ```Scala
+    def printArgs(args: Array[String]) : Unit = {
+        for (arg <- args)
+            println(arg)
+    }
+    ```
+
+    혹은 더 축약할 수도 있다.
+
+    ```Scala
+    def printArgs(args: Array[String]) : Unit = {
+      args.foreach(println)
+    }
+    ```
+
+    리팩토링 된 코드는 더 명확하고 간결하며, 원래의 명령형 코드에 비해 오류 가능성이 낮다. 그러나 이 함수 내부에 표준 출력 스트림에 글자를 찍는 **부수효과(side effect)**를 가지고 있기 때문에, 완전한 함수형 코드라고 할 수 없다.
+
+-   함수가 값을 리턴하지 않는지(함수의 타입이 Unit인지) 확인한다.
+
+    만약 함수의 타입이 Unit이라면, 이 함수가 주변 세계에 영향을 끼칠 수 있는 유일한 방법은 어떤 형태로든 부수 효과를 통하는 것일 수 밖에 없다. 이보다는 유의미한 값을 리턴하는 함수가 더욱 함수형 스타일이다. 위의 코드를 더 함수적으로 표현하면 다음과 같다.
+
+    ```Scala
+    def formatArgs(args: Array[String]) = args.mkString("\n")
+    ```
+
+    mkString 메서드는 대상 Collection의 각각 원소에 toString을 호출하여 얻은 문자열 사이에 인자로 넘긴 문자열을 끼워 넣은 문자열을 반환한다. 이 함수는 이전 printArgs 함수와 달리 실제 아무 값도 출력하지 않는다. 하지만 결과를 print에 넘기면 쉽게 화면에 출력할 수 있다.
+
+    이러한 접근 방식의 장점 중 하나는 프로그램을 테스트하기 더 쉽다는 것이다. printArgs 함수를 테스트하려면 println 함수를 수정하여 들어온 인자를 원하는 값과 비교하도록 바꾸어야 한다. 반면, formatArgs 함수는 그냥 결과 값을 원하는 문자열과 비교하면 된다. 다음 코드는 formatArgs 함수를 테스트한다.
+
+    ```Scala
+    val res = formatArgs(Array("zero", "one", "two"))
+    assert(res == "zero\none\ntwo")
+    // assert의 인자가 거짓일 경우 : throw AssertionError
+    ```
+
+    *NOTE) val, 변경 불가능한 객체, 부수 효과가 없는 메소드를 더 많이 사용하라. 먼저 그런 접근 방법을 시도해 보라. var, 변경 가능한 객체, 부수 효과가 있는 메소드를 사용해야 할 구체적인 필요성이 있고 그런 이유를 정당화할 수 있는 경우에만 var, 변경 가능 객체, 부수효과를 사용하라.*
