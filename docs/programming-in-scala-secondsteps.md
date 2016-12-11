@@ -246,3 +246,66 @@ println(immutableMap(1))
     ```
 
     *NOTE) val, 변경 불가능한 객체, 부수 효과가 없는 메소드를 더 많이 사용하라. 먼저 그런 접근 방법을 시도해 보라. var, 변경 가능한 객체, 부수 효과가 있는 메소드를 사용해야 할 구체적인 필요성이 있고 그런 이유를 정당화할 수 있는 경우에만 var, 변경 가능 객체, 부수효과를 사용하라.*
+
+### 스크립트 예시
+
+다음은 어떤 파일의 모든 줄의 문자 개수를 줄을 맞춰 출력하는 프로그램이다.
+
+```Scala
+import scala.io.Source
+
+def widthOfLength(s:String) = s.length.toString.length
+//한 라인의 길이를 표현한 String의 너비를 나타낸다.
+
+if(args.length > 0) {
+    val lines = Source.fromFile(args(0)).getLines().toList
+    //getLines()는 Iterator[String]을 반환하므로, toList를 통해 리스트 변수로 바꾸어야 한다.
+
+/*
+    var maxWidth = 0
+    for (line <- lines)
+        maxWidth = maxWidth.max(widthOfLength(line))
+*/
+//lines 리스트에서 각각의 라인들의 widthOfLength의 최대값을 찾는, var 변수를 사용한 코드이다.
+
+    val longestLine = lines.reduceLeft(
+        (a, b) => if (a.length > b.length) a else b
+    )
+    val maxWidth = widthOfLength(longestLine)
+    //lines 리스트에서 각각의 라인들의 widthOfLength의 최대값을 찾는, val 변수를 사용한 코드이다.
+    //먼저 리스트가 지원하는 reduceLeft 메소드를 통해 가장 긴 라인을 찾고, 그 라인의 너비를 구한다.
+
+    for (line <- lines) {
+        val numSpaces = maxWidth - widthOfLength(line)
+        val padding = " " * numSpaces
+        println(padding + line.length + " | " + line)
+    }
+    // 원하는 포맷에 맞추어 파일의 내용을 출력한다.
+}
+else
+    Console.err.println("Please enter filename")
+    //에러 메시지를 stderr에 출력한다.
+```
+
+위의 프로그램을 (주석을 제거한) 자체 소스코드에 실행하면, 다음과 같은 형식으로 출력된다.
+
+    22 | import scala.io.Source
+     0 |
+    54 | def widthOfLength(s:String) = s.length.toString.length
+     0 |
+    21 | if(args.length > 0) {
+    56 |   val lines = Source.fromFile(args(0)).getLines().toList
+    37 |   val longestLine = lines.reduceLeft(
+    47 |     (a, b) => if (a.length > b.length) a else b
+     3 |   )
+    43 |   val maxWidth = widthOfLength(longestLine)
+    23 |   for (line <- lines) {
+    58 |     val numSpaces = " " * (maxWidth - widthOfLength(line))
+    23 |     val padding = " | "
+    53 |     println(numSpaces + line.length + padding + line)
+     3 |   }
+     1 | }
+     4 | else
+    46 |   Console.err.println("Please enter filename")
+
+[Next](programming-in-scala-class.md)
