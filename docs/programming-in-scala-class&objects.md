@@ -75,6 +75,7 @@ add 메소드와 같이 타입이 Unit인 경우, 이 메소드는 부수 효과
 ChecksumAccumulator 클래스의 최종 버전은 다음과 같다.
 
 ```Scala
+//ChecksumAccumulator.scala 파일
 class ChecksumAccumulator {
     private var sum = 0
     def add(b: Byte) { sum += b }
@@ -92,3 +93,124 @@ def g() {"String lost again"}
 def h() = {"This String is returned!"}
 // 실행시, h()안의 String이 반환된다.
 ```
+
+###세미콜론 추론
+
+스칼라 프로그램에서는 보통 문장 끝의 세미콜론(;)을 생략할 수 있다. 그러나, 한 줄에 여러 문장을 넣으려면 다음과 같이 꼭 중간에 세미콜론이 필요하다.
+
+```Scala
+val string = "hey"; println(string)
+```
+
+여러 줄에 걸쳐 한 문장을 입력하려면 보통의 경우 단순히 입력하면 된다.
+
+```Scala
+if(x < 2)
+  println("too small")
+else
+  println("okay")
+```
+
+가끔 자동으로 스칼라가 문장을 나누는 경우도 있는데, 다음과 같은 경우는 주의하여야 한다.
+
+```Scala
+x
++ y         // x와 + y의 두 문장으로 파싱됨
+
+(x
++ y)        // 괄호로 인해, x + y로 파싱됨
+
+x +
+y           // 연산자가 줄의 끝에 있으므로, x + y로 파싱됨
+```
+
+위와 같은 이유로 인해, 중위연산자(두 변수 사이의 중간에 들어가는 연산자)를 사용할때는 줄의 시작보다 줄의 끝에 연산자를 배치하는 것이 일반적인 스칼라 코딩 스타일이다.
+
+*NOTE) 세미콜론 추론 규칙*
+    *1. 어떤 줄이 어떤 명령을 끝낼 수 있는 단어로 끝나지 않음("."나 중위연산자 등이 줄의 맨 끝에 있음)*
+    *2. 다음줄의 맨 앞이 문장을 시작할 수 없는 단어로 시작함*
+    *3. 줄이 괄호(())나 대괄호([]) 사이에서 끝남.*
+
+###싱글톤 객체
+
+스칼라는 자바 클래스의 정적(static)멤버들 대신 **싱글톤 객체(Singleton Object)**라는 것을 제공한다. 싱글톤 객체의 정의는 클래스 정의와 비슷하지만, class 대신 object라는 키워드로 시작한다. 다음은 한 싱글톤 객체의 정의이다.
+
+```Scala
+//ChecksumAccumulator.scala 파일
+import scala.collection.mutable.Map
+object ChecksumAccumulator {
+  private val cache = Map[String, Int]()
+  def calculate(s:String): Int =
+    if(cache.contains(s))
+      cache(s)
+    else {
+      val acc = new ChecksumAccumulator
+      for (c <- s)
+        acc.add(c.toByte)
+      val cs = acc.checksum()
+      cache += (s->cs)
+      cs
+    }
+}
+```
+
+이 싱글톤 객체의 이름은 클래스를 살펴볼때 정의한 클래스와 같다. 이런 경우, 이 객체를 클래스의 **동반 객체(Companion Object)**라고 한다. 클래스와 그의 동반 객체는 반드시 같은 소스 파일 안에 정의해야 한다. 이때, 해당 클래스는 싱글톤 객체의 **동반 클래스(Companion Class)**라고 한다. 클래스와 동반 객체는 상대방의 비공개 멤버에 접근 가능하다.
+
+싱글톤 객체를 자바의 정적 메소드를 보관하는 곳으로 생각해도 좋다. 싱글톤 객체 정의는 타입을 정의하지 않는다. 자바와 다른 점은, 싱글톤 객체는 **1급(first class)**으로써 슈퍼클래스를 확장(extend)하거나 트레이트를 믹스인(mix-in)할 수 있다는 점이다. 각 싱글톤 객체는 확장한 슈퍼클래스나 믹스인 트레이트의 인스턴스로써 해당 타입의 인스턴스가 하는 역할들을 할 수 있다.
+
+클래스와 싱글톤 객체의 차이 중 하나는 클래스와 달리 싱글톤 객체는 파라미터를 받을 수 없다는 것이다. 컴파일러는 각 싱글톤 객체를 **합성한 클래스(Synthetic Class)**의 인스턴스로 구현하고, 이를 정적 변수가 참조한다. 어떤 싱글톤 객체의 초기화는 어떤 코드가 그 객체에 처음 접근할때 일어난다. 즉 ChecksumAccumulator의 경우, 처음 접근시에 ChecksumAccumulator$라는 인스턴스가 생성되고 이를 ChecksumAccumulator라는 정적 변수가 참조하게 된다.
+
+동반 클래스가 없는 싱글톤 객체를 **독립 객체(Standalone Object)** 혹은 **독립 싱글톤 객체(Standalone Singleton Object)**라고 한다. 이는 필요한 유틸 메소드들을 모아놓거나 어플리케이션의 진입점을 만들 때 사용 가능하다.
+
+###스칼라 애플리케이션
+
+스칼라 프로그램의 실행을 위해서는, Array[String]을 유일한 인자로 받고 Unit을 반환하는 main이란 메소드가 있는 독립 싱글톤 객체 이름이 필요하다. 타입에 맞는 main 메소드만 있으면 어떤 독립 객체도 어플리케이션의 시작점 역할을 할 수 있다.
+
+```Scala
+//Summer.scala 파일. 
+//스칼라에서는 파일의 이름을 꼭 클래스, 객체의 이름과 맞출 필요는 없다.
+
+import ChecksumAccumulator.calculate        // Java의 static import와 같다
+
+object Summer {
+  def main(args: Array[String]) {           // 애플리케이션 시작점 역할의 메소드
+    for (arg <- args)
+      println(arg +": "+calculate(arg))
+  }
+}
+```
+
+스칼라는 항상 java.lang과 scala 패키지의 멤버를 암시적으로 임포트한다. scala 패키지의 Predef라는 싱글톤 객체에 유용한 메소드(println, assert 등)들이 많은수 분포한다.
+
+해당 애플리케이션은 스칼라 컴파일러 **scalac**를 통하여 컴파일 할 수 있다.
+
+```Console
+scalac ChecksumAccumulator.scala Summer.scala
+```
+
+scalac의 컴파일은 초기화 작업으로 인해 꽤 오랜 시간이 걸린다. **fsc(fast scala compiler)**을 사용하면 최초 실행할때에만 초기화 작업을 기다리면 되며, 다음 부터는 데몬에서 코드가 빠르게 컴파일된다. fsc -shutdown 커맨드로 데몬을 중지할 수 있다.
+
+```Console
+fsc ChecksumAccumulator.scala Summer.scala
+```
+
+컴파일된 애플리케이션은 main 메소드가 들어 있는 독립 싱글톤 객체의 이름을 사용하여 살행할 수 있다.
+
+```Console
+scala Summer is here
+```
+
+is, here 두 문자열에 대한 체크섬이 출력된다.
+
+### App 트레이트
+
+Summer 싱글톤 오브젝트는 App 트레이트를 상속함으로써 main 메소드 없이 간단하게 구현가능하다. 싱글톤 객체의 중괄호 사이에 있는 코드는 싱글톤 객체의 **주 생성자(primary constructor)** 안에 들어가며, 오브젝트를 초기화할때 실행된다.
+
+```Scala
+object Summer extends App {
+  for (arg <- args)
+    println(arg + ": " + calculate(arg))
+}
+```
+
+[Next](programming-in-scala-primary-types&operations.md)
