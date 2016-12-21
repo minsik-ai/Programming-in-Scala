@@ -88,8 +88,10 @@ class ChecksumAccumulator {
 ```Scala
 def f(): Unit = "Lost String"
 // 실행시, f()안의 String은 사라진다.
+
 def g() {"String lost again"}
 // 실행시, g()안의 String은 사라진다.(프로시져 스타일)
+
 def h() = {"This String is returned!"}
 // 실행시, h()안의 String이 반환된다.
 ```
@@ -213,4 +215,4 @@ object Summer extends App {
 }
 ```
 
-[Next](programming-in-scala-primary-types&operations.md)
+[Next](programming-in-scala-basic-types&ops.md)
