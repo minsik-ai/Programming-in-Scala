@@ -3,3 +3,7 @@
 모던 JVM언어 **Scala**에 대해 학습하고 있는 내용들을 한국어로 정리 중입니다.
 
 [Programming in Scala](docs/programming-in-scala-intro.md)
+
+[Functional Programming Principles In Scala](Functional-Programming-Principles-In-Scala)
+
+_Solve HW problems on your own!_
