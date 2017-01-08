@@ -1,0 +1,7 @@
+# Coursera HW Auxillary Files
+
+.idea/
+project/
+target/
+assignment.sbt
+build.sbt
