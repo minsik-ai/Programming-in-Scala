@@ -6,4 +6,4 @@
 
 [Functional Programming Principles In Scala](Functional-Programming-Principles-In-Scala)
 
-_Solve HW problems on your own!_
+Includes my HW submissions for first two Scala courses in Coursera.
